@@ -1,12 +1,12 @@
 # State Wrangler
 
-State Wranglier is a light-weight state management tool meant to work with React state libraries, like Redux or React's own Context API.
+State Wrangler is a light-weight state management tool meant to work with React state libraries, like Redux or React's own Context API.
 
 ### Installation
 `npm i state-wrangler --save` or `yarn add state-wrangler`
 
 ### Using in your reducer
-import with: `import StateManager from 'state-wrangler';` and in your reducer, declare the following, with your initial state object as the only argument:<br />
+import with: `import StateManager from 'state-wrangler';` and in your reducer, declare the following, with your initial state object as the only argument:
 `const state = new StateManager(initialState);`
 
 ```jsx
