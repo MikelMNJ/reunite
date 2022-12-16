@@ -1,6 +1,6 @@
 {
-  "name": "state-wranger",
-  "version": "0.1.0",
+  "name": "state-wrangler",
+  "version": "0.2.0",
   "description": "State management, made easy.",
   "author": "Mikel Jagan",
   "license": "MIT",
@@ -23,15 +23,15 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.20.5",
     "@babel/preset-react": "^7.18.6"
   },
-
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MikelMNJ/reunite.git"
+    "url": "git+https://github.com/MikelMNJ/state-wrangler.git"
   },
   "bugs": {
-    "url": "https://github.com/MikelMNJ/reunite/issues"
+    "url": "https://github.com/MikelMNJ/state-wrangler/issues"
   },
-  "homepage": "https://github.com/MikelMNJ/reunite#readme"
+  "homepage": "https://github.com/MikelMNJ/state-wrangler#readme"
 }
