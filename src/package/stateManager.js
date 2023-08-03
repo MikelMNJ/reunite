@@ -6,7 +6,7 @@ class StateManager {
   constructor(initialState, action) {
     this.initialState = initialState;
     this.action = action;
-  };
+  }
 
   merge(array) {
     const changed = [];
@@ -14,7 +14,7 @@ class StateManager {
     const removed = [];
     let workingState = { ...this.initialState };
 
-    if (!array) console.warn("No merge array provided, state unchanged.");
+    if (!array) console.warn('No merge array provided, state unchanged.');
 
     if (!_.isEmpty(array)) {
       // Record changes for all top-level state keys.
@@ -31,33 +31,34 @@ class StateManager {
 
       // Handle top-level removals...
       removed.forEach(key => {
+        // eslint-disable-next-line no-unused-vars
         const { [key]: value, ...withoutKey } = workingState;
         workingState = { ...withoutKey };
       });
+
+      // Accumulate all changes for each key in the workingState
+      const accumulatedChanges = changed.reduce((prevState, changedState) => {
+        return { ...prevState, ...changedState };
+      }, {});
 
       // Iterate through top-level state keys and recursively combine all changes and child changes.
       return Object.keys(workingState).reduce((prevState, key) => {
         const prevVal = prevState[key];
         let nextVal;
 
-        changed.forEach(changed => {
-          const hasChange = changed[key];
-          if (hasChange) {
-            nextVal = mergeChanges(changed, key, workingState, prevVal, nextVal);
-            return nextVal;
-          }
-        });
+        // Use the accumulatedChanges for the current key
+        const hasChange = accumulatedChanges[key];
+        if (hasChange) {
+          nextVal = mergeChanges(accumulatedChanges, key, workingState, prevVal, nextVal);
+          return { ...prevState, [key]: nextVal || prevVal };
+        }
 
-        // For debugging
-        // console.log({ ...prevState, [key]: nextVal || prevVal });
-
-        if (nextVal) return { ...prevState, [key]: nextVal || prevVal };
         return { ...prevState };
       }, workingState);
     }
 
     return workingState;
-  };
+  }
 
   get(stateKey, stringOrIndex) {
     const target = this.initialState[stateKey];
@@ -66,14 +67,14 @@ class StateManager {
     const targetValid = target !== undefined;
 
     if (!targetValid) {
-      console.warn("Could not get value from state, provided state key name does not exist.");
+      console.warn('Could not get value from state, provided state key name does not exist.');
     }
 
     if (targetValid && (isArr || isObj)) {
       const validStringIndex = target[stringOrIndex];
 
       if (stringOrIndex && !validStringIndex) {
-        isArr ? objectKeyError(true, stringOrIndex, target) : targetError("get");
+        isArr ? objectKeyError(true, stringOrIndex, target) : targetError('get');
         return target[stringOrIndex];
       }
 
@@ -81,7 +82,7 @@ class StateManager {
     }
 
     return target;
-  };
+  }
 
   addArr(stateKey, payload) {
     const target = this.initialState[stateKey];
@@ -91,14 +92,14 @@ class StateManager {
       ...this.initialState,
       [stateKey]: updatedArr,
     };
-  };
+  }
 
   addObj(stateKey, payload) {
     const target = this.initialState[stateKey];
 
     if (_.isObject(payload) && !_.isArray(payload)) {
       if (_.isEmpty(payload)) {
-        console.warn("Empty object, state unchanged.");
+        console.warn('Empty object, state unchanged.');
         return { ...this.initialState };
       }
 
@@ -107,17 +108,17 @@ class StateManager {
         [stateKey]: {
           ...this.initialState[stateKey],
           ...payload,
-        }
+        },
       };
     }
 
     objectTypeError(payload, target);
     return { ...this.initialState };
-  };
+  }
 
   add(stateKey, payload) {
     const workingState = { ...this.initialState };
-    let target = workingState[stateKey];
+    const target = workingState[stateKey];
     const isArr = _.isArray(target);
     const isObj = _.isObject(target);
     const payloadValid = payload !== undefined;
@@ -133,7 +134,7 @@ class StateManager {
     }
 
     return { ...this.initialState };
-  };
+  }
 
   updateArr(stateKey, payload, stringOrIndex) {
     const target = this.initialState[stateKey];
@@ -157,43 +158,43 @@ class StateManager {
       return {
         ...this.initialState,
         [stateKey]: payload,
-      }
+      };
     }
 
     objectKeyError(isArr, index, target);
     return { ...this.initialState };
-  };
+  }
 
   updateObj(stateKey, payload, stringOrIndex) {
     const target = this.initialState[stateKey];
     const isArr = _.isArray(target);
     const key = stringOrIndex;
-    const validKey = typeof key === "string" && target[key];
+    const validKey = typeof key === 'string' && target[key];
 
     if (validKey) {
       return {
         ...this.initialState,
         [stateKey]: {
           ...this.initialState[stateKey],
-          [key]: payload
-        }
+          [key]: payload,
+        },
       };
     }
 
     if (!key) {
       return {
         ...this.initialState,
-        [stateKey]: payload
+        [stateKey]: payload,
       };
     }
 
     objectKeyError(isArr, key, target);
     return { ...this.initialState };
-  };
+  }
 
   update(stateKey, payload, stringOrIndex) {
     const workingState = { ...this.initialState };
-    let target = workingState[stateKey];
+    const target = workingState[stateKey];
     const isArr = _.isArray(target);
     const isObj = _.isObject(target);
     const payloadValid = payload !== undefined;
@@ -211,13 +212,13 @@ class StateManager {
     }
 
     return { ...this.initialState };
-  };
+  }
 
   removeArr(stateKey, stringOrIndex, rest) {
     const target = this.initialState[stateKey];
     const isArr = _.isArray(target);
     const index = stringOrIndex;
-    const indexValid = stringOrIndex >= 0 && stringOrIndex <= target?.length;
+    const indexValid = typeof index === 'number' && index >= 0 && index < target.length;
 
     if (indexValid) {
       const updatedArr = target.filter((item, i) => i !== index);
@@ -232,15 +233,16 @@ class StateManager {
 
     objectKeyError(isArr, index, target);
     return { ...this.initialState };
-  };
+  }
 
   removeObj(stateKey, stringOrIndex, rest) {
     const target = this.initialState[stateKey];
     const isArr = _.isArray(target);
     const key = stringOrIndex;
-    const validKey = typeof key === "string" && target[key];
+    const validKey = typeof key === 'string' && Object.prototype.hasOwnProperty.call(target, key);
 
     if (validKey) {
+      // eslint-disable-next-line no-unused-vars
       const { [key]: value, ...localRest } = target;
 
       return {
@@ -253,15 +255,16 @@ class StateManager {
 
     objectKeyError(isArr, key, target);
     return { ...this.initialState };
-  };
+  }
 
   remove(stateKey, stringOrIndex) {
     const workingState = { ...this.initialState };
-    let target = workingState[stateKey];
+    const target = workingState[stateKey];
     const isArr = _.isArray(target);
     const isObj = _.isObject(target);
 
     if (stateKey) {
+      // eslint-disable-next-line no-unused-vars
       const { [stateKey]: value, ...rest } = this.initialState;
 
       if (!target) targetError('remove');
@@ -272,7 +275,7 @@ class StateManager {
     }
 
     return { ...this.initialState };
-  };
-};
+  }
+}
 
 export default StateManager;

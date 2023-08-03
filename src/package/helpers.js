@@ -118,6 +118,7 @@ const mergeObj = (nextVal, original, newVal) => {
   if (!_.isEmpty(removed)) {
     let withRemoved = { ...workingObj };
     removed.forEach(key => {
+      // eslint-disable-next-line no-unused-vars
       const { [key]: value, ...withoutKey } = withRemoved;
       withRemoved = withoutKey;
     });
