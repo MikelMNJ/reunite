@@ -1,5 +1,4 @@
 import { objectTypeError, objectKeyError, targetError } from './stateErrors';
-import { changedKeys, addedKeys, removedKeys, mergeChanges } from './helpers';
 import _ from 'lodash';
 
 class StateManager {
@@ -9,55 +8,26 @@ class StateManager {
   }
 
   merge(array) {
-    const changed = [];
-    const added = [];
-    const removed = [];
-    let workingState = { ...this.initialState };
+    let mergedState = { ...this.initialState };
 
-    if (!array) console.warn('No merge array provided, state unchanged.');
+    if (_.isEmpty(array)) console.warn('No merge items provided, state unchanged.');
 
-    if (!_.isEmpty(array)) {
-      // Record changes for all top-level state keys.
-      array.forEach(modifiedState => {
-        addedKeys(added, modifiedState, workingState);
-        changedKeys(changed, modifiedState, workingState);
-        removedKeys(removed, modifiedState, workingState);
-      });
+    array.forEach(item => {
+      const { key: stateKey, payload, method: stateUpdateMethod } = item;
+      const method = _.toLower(stateUpdateMethod);
 
-      // Handle top-level additions...
-      added.forEach(addition => {
-        workingState = { ...workingState, ...addition };
-      });
+      if (method === 'add' || method === 'update') {
+        mergedState = { ...mergedState, [stateKey]: payload };
+      }
 
-      // Handle top-level removals...
-      removed.forEach(key => {
+      if (method === 'remove') {
         // eslint-disable-next-line no-unused-vars
-        const { [key]: value, ...withoutKey } = workingState;
-        workingState = { ...withoutKey };
-      });
+        const { [stateKey]: value, ...withoutKey } = mergedState;
+        mergedState = { ...withoutKey };
+      }
+    });
 
-      // Accumulate all changes for each key in the workingState
-      const accumulatedChanges = changed.reduce((prevState, changedState) => {
-        return { ...prevState, ...changedState };
-      }, {});
-
-      // Iterate through top-level state keys and recursively combine all changes and child changes.
-      return Object.keys(workingState).reduce((prevState, key) => {
-        const prevVal = prevState[key];
-        let nextVal;
-
-        // Use the accumulatedChanges for the current key
-        const hasChange = accumulatedChanges[key];
-        if (hasChange) {
-          nextVal = mergeChanges(accumulatedChanges, key, workingState, prevVal, nextVal);
-          return { ...prevState, [key]: nextVal || prevVal };
-        }
-
-        return { ...prevState };
-      }, workingState);
-    }
-
-    return workingState;
+    return mergedState;
   }
 
   get(stateKey, stringOrIndex) {

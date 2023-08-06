@@ -68,12 +68,18 @@ such as a string or number, or more complex, like an Array or Object.  Meaning y
 `state.remove(STATE_KEY_TO_REMOVE, "keyName")`: Removes specific key from state key object.<br />
 
 ### Modifying multiple state values
-There are times where you may need to alter multiple state values at once, this can be done with `state.merge()`, using an array as the only argument that contains any of the above methods.
+There are times where you may need to alter multiple state values at once, this can be done with `state.merge()`, using an array as the only argument that contains object with the following keys: `{ method, key, payload }`.
+
+* method: `update`, `remove`, or `add` are the only valid values &mdash; `get` is has no application in a merge operation.
+* `key`: the key name, as a string, of the state key you are targeting.
+* `payload`: the new value of the key defined above &mdash; please note the `remove` method does not require a payload.
+
+**Additional Note**: Due to the complexity of the merge operation, drilling in to nested objects or arrays to target specific nested keys or indices is not supported.  It is recommended to handle this ahead of time, either from your server response, or in your application before the payload hits the reducer for merging with other payloads.
 
 ```jsx
 state.merge([
-  state.update(STATE_KEY_TO_UPDATE, payload),
-  state.remove(STATE_KEY_TO_REMOVE),
-  state.add(STATE_KEY_TO_ADD, payload),
+  { method: 'add', key: STATE_KEY_TO_ADD, payload },
+  { method: 'update', key: STATE_KEY_TO_UPDATE, payload },
+  { method: 'remove', key: STATE_KEY_TO_REMOVE },
 ]);
 ```
