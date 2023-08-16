@@ -139,7 +139,7 @@ class StateManager {
     const target = this.initialState[stateKey];
     const isArr = _.isArray(target);
     const key = stringOrIndex;
-    const validKey = typeof key === 'string' && target[key];
+    const validKey = typeof key === 'string' && (target[key] !== undefined);
 
     if (validKey) {
       return {
